@@ -6,6 +6,7 @@ import Chat from "../pages/Chat";
 import Settings from "../pages/Setting";
 import ForgotPassword from "../pages/ForgotPassword";
 import CompleteSubmission from "../pages/CompleteSubmission";
+import CreateGroup from "../components/CreateGroup";
 
 const mainRoutes = {
   path: "/",
@@ -38,6 +39,10 @@ const mainRoutes = {
     {
       path: "reset-success",
       element: <CompleteSubmission/>
+    },
+    {
+      path: "create-group",
+      element: <CreateGroup />
     }
   ],
 };

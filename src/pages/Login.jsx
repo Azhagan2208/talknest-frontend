@@ -1,11 +1,22 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { MessageCircle } from "lucide-react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import Footer from "../components/Footer";
+import { useEffect } from "react";
+import API from "../utils/axios.js";
 
 const Login = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/app");
+    }
+  }, []);
+
   const validationSchema = Yup.object({
     email: Yup.string().required("Email is required"),
     password: Yup.string().required("Password is required"),
@@ -16,8 +27,17 @@ const Login = () => {
       password: "",
     },
     validationSchema: validationSchema,
-    onSubmit: (values) => {
-      console.log(values);
+    onSubmit: async (values) => {
+      try {
+        const res = await API.post("/auth/login", values);
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("user", JSON.stringify(res.data.user));
+        console.log("Login Success");
+        navigate("/app");
+      } catch (error) {
+        console.log(error);
+        alert("Login Failed");
+      }
     },
   });
   return (
@@ -33,7 +53,10 @@ const Login = () => {
         <p className="text-white text-center mb-5 text-sm">
           TalkNest: Secure, real-time messaging with JWT authentication.
         </p>
-        <form className="border border-[#2A2F3A] bg-[#191B1FFF]  w-[448px] rounded-md shadow-lg p-[10px]">
+        <form
+          className="border border-[#2A2F3A] bg-[#191B1FFF]  w-[448px] rounded-md shadow-lg p-[10px]"
+          onSubmit={formik.handleSubmit}
+        >
           <div className="flex text-white justify-center p-3 gap-5 mt-3">
             <button className="p-3 w-[188px] bg-[#34D4F4] rounded-md cursor-pointer text-black">
               Login
@@ -94,12 +117,12 @@ const Login = () => {
               </Link>
             </div>
           </div>
-          <Link
+          <button
             className="w-[384px] bg-[#34D4F4] p-3 rounded-md mx-auto block mt-5 cursor-pointer text-center"
-            to={"/app"}
+            type="submit"
           >
             Login
-          </Link>
+          </button>
           <p className="flex justify-center items-center gap-1 text-white mt-2">
             New to TalkNest?
             <Link className="text-[#34D4F4] cursor-pointer" to={"/register"}>

@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { chatList } from "../config/chat_list.js";
 import Profile from "../assets/logo_1.png";
 import { Settings } from "lucide-react";
@@ -7,6 +7,12 @@ import { LogOut } from "lucide-react";
 import Setting from "../pages/Setting";
 
 const Sidebar = () => {
+  const navigate = useNavigate();
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/");
+  };
   return (
     <div className="w-100 border-r border-gray-800 flex flex-col p-5">
       {/* Profile Section */}
@@ -14,6 +20,17 @@ const Sidebar = () => {
         <img src={Profile} className="w-10 h-10 rounded-full" alt="User" />
         <span className="font-bold">My Account</span>
       </div>
+
+      {/* Group chat Button */}
+      <div className="flex justify-center items-center">
+        <Link
+          className="p-4 bg-[#34D4F4] rounded-md text-black font-bold w-100 cursor-pointer mb-3 text-center"
+          to={"/create-group"}
+        >
+          Create a Group Chat
+        </Link>
+      </div>
+      {/* Button End */}
 
       <nav className="flex-1 flex flex-col gap-2 overflow-y-auto [&::-webkit-scrollbar]:hidden">
         <p className="text-gray-500 text-sm mb-4">CHATS</p>
@@ -47,7 +64,7 @@ const Sidebar = () => {
           className="flex items-center gap-2 text-red-400 p-2 hover:bg-red-900/20 rounded-md transition"
         >
           <LogOut size={18} />
-          <span>Logout</span>
+          <p onClick={logout}>Logout</p>
         </Link>
       </div>
     </div>

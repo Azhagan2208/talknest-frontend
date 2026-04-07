@@ -1,31 +1,58 @@
 import React, { useState } from "react";
 import { Camera, ChevronUp, ChevronRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import Footer from "../components/Footer";
+import API from "../utils/axios";
 
 const Register = () => {
+  const navigate = useNavigate();
+  const [preview, setPreview] = useState("");
+
   const validationSchema = Yup.object({
-    name: Yup.string().required("Name is Required"),
+    username: Yup.string().required("Name is Required"),
     email: Yup.string().email("Invalid email").required("Email is required!!"),
     password: Yup.string().required("Password is required"),
-    confirm_password: Yup.string()
-      .required("Confirmation is required!")
-      .oneOf([Yup.ref("password"), null], "Passwords must match"),
   });
   const formik = useFormik({
     initialValues: {
-      name: "",
+      username: "",
       email: "",
       password: "",
-      confirm_password: "",
+      profilePic: "",
     },
     validationSchema: validationSchema,
-    onSubmit: (values) => {
-      console.log(values);
+    onSubmit: async (values) => {
+      await API.post("/auth/register", values);
+      navigate("/login");
     },
   });
+  const handleImage = async (e) => {
+    const file = e.target.files[0];
+
+    if (!file) return;
+
+    const data = new FormData();
+    data.append("file", file);
+    data.append("upload_preset", "talknest");
+    data.append("cloud_name", "debqtq3uj");
+    try {
+      const res = await fetch(
+        "https://api.cloudinary.com/v1_1/debqtq3uj/image/upload",
+        {
+          method: "POST",
+          body: data,
+        },
+      );
+      const new_res = await res.json();
+
+      formik.setFieldValue("profilePic", new_res.secure_url);
+      setPreview(new_res.secure_url);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <div className="w-full min-h-screen bg-black flex flex-col justify-center items-center font-sans">
@@ -39,7 +66,7 @@ const Register = () => {
         </p>
 
         <form
-          action=""
+          onSubmit={formik.handleSubmit}
           className="border border-[#2A2F3A] bg-[#191B1FFF] w-[448px] rounded-md shadow-lg flex flex-col items-center"
         >
           <div className="flex text-white justify-center p-3 gap-5 mt-3 w-full">
@@ -58,25 +85,41 @@ const Register = () => {
             </button>
           </div>
 
-          <div className="flex flex-col items-center mt-6">
-            <input type="file" />
-          </div>
+          <label htmlFor="fileInput" className="cursor-pointer">
+            {preview ? (
+              <img
+                src={preview}
+                className="w-20 h-20 rounded-full object-cover mt-3 text-center"
+              />
+            ) : (
+              <div className="w-20 h-20 rounded-full bg-gray-700 flex items-center justify-center">
+                👤
+              </div>
+            )}
+          </label>
+          <input
+            type="file"
+            onChange={handleImage}
+            id="fileInput"
+            className="hidden"
+            accept="image/*"
+          />
           <div className="flex flex-col gap-2 mt-4 text-white/70 text-md">
             <div className="flex flex-col gap-2">
-              <label className="text-[14px]">Full Name</label>
+              <label className="text-[14px]">User Name</label>
               <input
-                type="password"
-                name="name"
-                id="name"
-                value={formik.values.name}
+                type="text"
+                name="username"
+                id="username"
+                value={formik.values.username}
                 onBlur={formik.handleBlur}
                 onChange={formik.handleChange}
                 className="w-[384px] p-2.5 rounded-md border border-[#5A5F68] bg-transparent text-white placeholder:text-gray-600 focus:outline-none focus:border-[#34D4F4] transition-colors"
                 placeholder="Ex. John Doe"
               />
-              {formik.touched.name && formik.errors.name && (
+              {formik.touched.username && formik.errors.username && (
                 <span className="text-red-500 text-md">
-                  {formik.errors.name}
+                  {formik.errors.username}
                 </span>
               )}
             </div>
@@ -118,26 +161,6 @@ const Register = () => {
                 </span>
               )}
             </div>
-
-            <div className="flex flex-col gap-2">
-              <label className="text-[14px]">Confirm Password</label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                name="confirm_password"
-                id="confirm_password"
-                value={formik.values.confirm_password}
-                onBlur={formik.handleBlur}
-                onChange={formik.handleChange}
-                className="w-[384px] p-2.5 rounded-md border border-[#5A5F68] bg-transparent text-white placeholder:text-gray-600 focus:outline-none focus:border-[#34D4F4] transition-colors"
-              />
-              {formik.touched.confirm_password &&
-                formik.errors.confirm_password && (
-                  <span className="text-red-500 text-md">
-                    {formik.errors.confirm_password}
-                  </span>
-                )}
-            </div>
             <div className="flex gap-2">
               <input type="checkbox" />
               <label htmlFor="">
@@ -153,12 +176,12 @@ const Register = () => {
               </label>
             </div>
 
-            <Link
+            <button
+              type="submit"
               className="bg-[#34D4F4] text-black font-bold py-3 rounded-md mt-4 hover:bg-[#2bc2e0] transition-colors flex justify-center items-center gap-3 text-[16px]"
-              to={"/app"}
             >
               Create Account <ChevronRight />
-            </Link>
+            </button>
             <p className="flex justify-center items-center gap-1 mb-[10px]">
               Already have an account?
               <Link className="text-[#34D4F4] cursor-pointer" to={"/login"}>
