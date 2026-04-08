@@ -3,9 +3,7 @@ import { useParams } from "react-router-dom";
 import { MessageSquare, CirclePlus } from "lucide-react";
 import Sidebar from "../components/Sidebar";
 import API from "../utils/axios.js";
-import { io } from "socket.io-client";
-
-const socket = io("http://localhost:5000");
+import socket from "../socket.js";
 
 const Chat = () => {
   const { id } = useParams();
@@ -14,10 +12,8 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
 
-  // ✅ FIX: define currentUser properly
   const currentUser = JSON.parse(localStorage.getItem("user"));
 
-  // 🔥 fetch users
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -30,10 +26,8 @@ const Chat = () => {
     fetchUsers();
   }, []);
 
-  // 🔥 selected user
   const selectedUser = users.find((user) => user._id === id);
 
-  // 🔥 fetch messages
   useEffect(() => {
     if (!id) return;
 
@@ -49,14 +43,14 @@ const Chat = () => {
     fetchMessages();
   }, [id]);
 
-  // 🔥 join socket
   useEffect(() => {
     if (!currentUser) return;
-
+    if (!socket.connected) {
+      socket.connect();
+    }
     socket.emit("join", currentUser._id);
-  }, [currentUser]);
+  }, []);
 
-  // 🔥 receive message
   useEffect(() => {
     socket.on("receiveMessage", (message) => {
       setMessages((prev) => [...prev, message]);
@@ -65,7 +59,6 @@ const Chat = () => {
     return () => socket.off("receiveMessage");
   }, []);
 
-  // 🔥 send message
   const sendMessage = async () => {
     if (!text) return;
 

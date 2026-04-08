@@ -1,6 +1,5 @@
 import React from "react";
 import Navbar from "../components/Navbar";
-import logo from "../assets/logo_1.png";
 import { Link } from "react-router-dom";
 
 const Settings = () => {

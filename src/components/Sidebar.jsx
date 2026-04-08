@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Profile from "../assets/logo_1.png";
 import { Settings, LogOut } from "lucide-react";
 import API from "../utils/axios.js";
 
@@ -31,7 +30,7 @@ const Sidebar = () => {
     <div className="w-100 border-r border-gray-800 flex flex-col p-5">
       {/* Profile Section */}
       <div className="flex items-center gap-3 mb-10">
-        <img src={Profile} className="w-10 h-10 rounded-full" alt="User" />
+        <img src={users.profilePic} className="w-10 h-10 rounded-full" alt="User" />
         <span className="font-bold">My Account</span>
       </div>
 
