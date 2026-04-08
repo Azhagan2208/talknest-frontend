@@ -1,88 +1,170 @@
-import React from "react";
-import { Link, useParams } from "react-router-dom";
-import { MessageSquare, LogOut } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { MessageSquare, CirclePlus } from "lucide-react";
 import Sidebar from "../components/Sidebar";
-import { chatList } from "../config/chat_list.js";
-import { CirclePlus } from "lucide-react";
-import { Send } from "lucide-react";
-import { PhoneCall } from "lucide-react";
+import API from "../utils/axios.js";
+import { io } from "socket.io-client";
+
+const socket = io("http://localhost:5000");
 
 const Chat = () => {
   const { id } = useParams();
-  const selectedUser = chatList.find((user) => user.id === parseInt(id));
+
+  const [users, setUsers] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [text, setText] = useState("");
+
+  // ✅ FIX: define currentUser properly
+  const currentUser = JSON.parse(localStorage.getItem("user"));
+
+  // 🔥 fetch users
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const res = await API.get("/users");
+        setUsers(res.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchUsers();
+  }, []);
+
+  // 🔥 selected user
+  const selectedUser = users.find((user) => user._id === id);
+
+  // 🔥 fetch messages
+  useEffect(() => {
+    if (!id) return;
+
+    const fetchMessages = async () => {
+      try {
+        const res = await API.get(`/messages/${id}`);
+        setMessages(res.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchMessages();
+  }, [id]);
+
+  // 🔥 join socket
+  useEffect(() => {
+    if (!currentUser) return;
+
+    socket.emit("join", currentUser._id);
+  }, [currentUser]);
+
+  // 🔥 receive message
+  useEffect(() => {
+    socket.on("receiveMessage", (message) => {
+      setMessages((prev) => [...prev, message]);
+    });
+
+    return () => socket.off("receiveMessage");
+  }, []);
+
+  // 🔥 send message
+  const sendMessage = async () => {
+    if (!text) return;
+
+    try {
+      const res = await API.post("/messages", {
+        receiver: id,
+        text,
+      });
+
+      setMessages((prev) => [...prev, res.data]);
+
+      socket.emit("sendMessage", {
+        receiver: id,
+        message: res.data,
+      });
+
+      setText("");
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
-    <div className="flex h-screen bg-black text-white font-sans">
-      {/* Sidebar */}
+    <div className="flex h-screen bg-black text-white">
       <Sidebar />
 
-      {/* Main Chat Area */}
       <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 bg-gray-900 border-b border-gray-800">
+        {/* HEADER */}
+        <div className="flex items-center p-4 bg-gray-900 border-b border-gray-800">
           {selectedUser ? (
             <div className="flex items-center gap-3">
               <img
-                src={selectedUser.Profile}
-                alt={selectedUser.Name}
+                src={selectedUser.profilePic}
+                alt=""
                 className="w-10 h-10 rounded-full object-cover"
               />
-              <span className="font-bold">{selectedUser.Name}</span>
-              <button className="flex ml-250 gap-2 cursor-pointer fixed">
-                <PhoneCall />
-                Call
-              </button>
+              <span className="font-bold">{selectedUser.username}</span>
             </div>
           ) : (
             <span className="font-bold text-xl">TalkNest</span>
           )}
         </div>
 
-        {/* Chat Content */}
-        <div className="flex-1 flex flex-col items-center justify-center p-10 bg-[#0B0D11]">
+        {/* CHAT AREA */}
+        <div className="flex-1 flex flex-col bg-[#0B0D11]">
           {selectedUser ? (
-            <div className="w-full max-w-4xl h-full flex flex-col">
-              {/* Messages Area */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                <div className="flex justify-start">
-                  <div className="bg-gray-800 p-3 rounded-lg max-w-xs">
-                    <p>{selectedUser.Message}</p>
+            <>
+              {/* MESSAGES */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                {messages.map((msg) => (
+                  <div
+                    key={msg._id}
+                    className={`flex ${
+                      msg.sender === currentUser?._id
+                        ? "justify-end"
+                        : "justify-start"
+                    }`}
+                  >
+                    <div className="bg-gray-800 p-3 rounded-lg max-w-xs">
+                      <p>{msg.text}</p>
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
-              {/* Message Input */}
+
+              {/* INPUT */}
               <div className="p-4 border-t border-gray-800">
-                <div className="flex gap-2">
-                  <button>
-                    <CirclePlus
-                      size={24}
-                      className="text-[#34D4F4] cursor-pointer"
-                    />
-                  </button>
+                <div className="flex gap-2 items-center">
+                  <CirclePlus className="text-[#34D4F4] cursor-pointer" />
+
                   <input
                     type="text"
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
                     placeholder="Type a message..."
-                    className="flex-1 p-2 bg-gray-800 rounded-lg text-white focus:outline-none"
+                    className="flex-1 p-2 bg-gray-800 rounded-lg outline-none"
                   />
-                  <button className="cursor-pointer">
-                    <Send size={20} className="text-[#34D4F4]" />
+
+                  <button
+                    onClick={sendMessage}
+                    className="bg-[#34D4F4] text-black px-4 py-2 rounded-lg font-bold"
+                  >
+                    Send
                   </button>
                 </div>
               </div>
-            </div>
+            </>
           ) : (
-            <>
-              <div className="p-6 bg-gray-900 rounded-3xl mb-5 shadow-xl cursor-pointer">
+            <div className="flex flex-col items-center justify-center h-full">
+              <div className="p-6 bg-gray-900 rounded-3xl mb-5">
                 <MessageSquare size={50} className="text-[#34D4F4]" />
               </div>
+
               <h1 className="text-3xl font-bold mb-2">Welcome to TalkNest!</h1>
+
               <p className="text-gray-400 text-center max-w-sm">
-                Select a friend from the sidebar to start a conversation.
+                Select a friend from the sidebar to start chatting.
               </p>
-              <button className="mt-8 px-6 py-2 bg-[#34D4F4] text-black font-bold rounded-lg hover:scale-105 transition">
-                Start Messaging
-              </button>
-            </>
+            </div>
           )}
         </div>
       </div>

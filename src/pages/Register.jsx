@@ -18,6 +18,7 @@ const Register = () => {
   const formik = useFormik({
     initialValues: {
       username: "",
+      tagline: "",
       email: "",
       password: "",
       profilePic: "",
@@ -92,8 +93,8 @@ const Register = () => {
                 className="w-20 h-20 rounded-full object-cover mt-3 text-center"
               />
             ) : (
-              <div className="w-20 h-20 rounded-full bg-gray-700 flex items-center justify-center">
-                👤
+              <div className="w-20 h-20 rounded-full bg-gray-700 flex items-center justify-center text-white">
+                No Image
               </div>
             )}
           </label>
@@ -120,6 +121,27 @@ const Register = () => {
               {formik.touched.username && formik.errors.username && (
                 <span className="text-red-500 text-md">
                   {formik.errors.username}
+                </span>
+              )}
+            </div>
+            </div>
+
+            <div className="flex flex-col gap-2 mt-4 text-white/70 text-md">
+            <div className="flex flex-col gap-2">
+              <label className="text-[14px]">Tagline</label>
+              <input
+                type="text"
+                name="tagline"
+                id="tagline"
+                value={formik.values.tagline}
+                onBlur={formik.handleBlur}
+                onChange={formik.handleChange}
+                className="w-[384px] p-2.5 rounded-md border border-[#5A5F68] bg-transparent text-white placeholder:text-gray-600 focus:outline-none focus:border-[#34D4F4] transition-colors"
+                placeholder="At meeting.."
+              />
+              {formik.touched.tagline && formik.errors.tagline && (
+                <span className="text-red-500 text-md">
+                  {formik.errors.tagline}
                 </span>
               )}
             </div>
