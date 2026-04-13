@@ -3,6 +3,9 @@ import { MessageSquare } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Navbar = () => {
+
+  const currentUser = JSON.parse(localStorage.getItem("user"))
+
   return (
     <div className="w-full h-full bg-[#17191CFF]">
       <div className="bg-[#17191CFF] w-full h-[64px] flex justify-between">
@@ -19,7 +22,7 @@ const Navbar = () => {
           />
           <MessageSquare className="text-white mt-[6px]" />
           <img
-            src={logo}
+            src={currentUser.profilePic}
             alt=""
             className="border border-white rounded-[50%] h-[36px] w-[36px]"
           />

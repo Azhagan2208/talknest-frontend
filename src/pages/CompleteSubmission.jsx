@@ -39,7 +39,7 @@ const CompleteSubmission = () => {
         <div className="mt-[13px]">
           <RefreshCw size={20} className="text-white" />
         </div>
-        <p className="text-[#CCCCCCFF] text-center mt-[10px]">
+        <p className="text-[#CCCCCCFF] text-center mt-[10px] flex gap-1">
           Didn't receive the email?
           <button
             onClick={handleResend}

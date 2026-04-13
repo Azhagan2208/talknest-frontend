@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import { Camera, ChevronUp, ChevronRight } from "lucide-react";
+import { Camera, ChevronRight } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import Footer from "../components/Footer";
 import API from "../utils/axios";
+import { toast, ToastContainer } from "react-toastify";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -26,7 +27,10 @@ const Register = () => {
     validationSchema: validationSchema,
     onSubmit: async (values) => {
       await API.post("/auth/register", values);
-      navigate("/login");
+      toast.success("Registration Successful!", { theme: "dark" });
+      setTimeout(() => {
+        navigate("/login");
+      }, 1500);
     },
   });
   const handleImage = async (e) => {
@@ -57,6 +61,7 @@ const Register = () => {
 
   return (
     <div className="w-full min-h-screen bg-black flex flex-col justify-center items-center font-sans">
+      <ToastContainer position="top-right" autoClose={1500} />
       <div>
         <h1 className="text-white text-center mb-2 font-bold text-3xl">
           Welcome to Talk<span className="text-[#34D4F4]">Nest</span>
@@ -94,7 +99,7 @@ const Register = () => {
               />
             ) : (
               <div className="w-20 h-20 rounded-full bg-gray-700 flex items-center justify-center text-white">
-                No Image
+                <Camera className="text-[#34D4F4]" />
               </div>
             )}
           </label>
@@ -124,9 +129,9 @@ const Register = () => {
                 </span>
               )}
             </div>
-            </div>
+          </div>
 
-            <div className="flex flex-col gap-2 mt-4 text-white/70 text-md">
+          <div className="flex flex-col gap-2 mt-4 text-white/70 text-md">
             <div className="flex flex-col gap-2">
               <label className="text-[14px]">Tagline</label>
               <input

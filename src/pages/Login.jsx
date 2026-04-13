@@ -6,6 +6,8 @@ import * as Yup from "yup";
 import Footer from "../components/Footer";
 import { useEffect } from "react";
 import API from "../utils/axios.js";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -32,16 +34,19 @@ const Login = () => {
         const res = await API.post("/auth/login", values);
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("user", JSON.stringify(res.data.user));
-        console.log("Login Success");
-        navigate("/app");
+
+        toast.success("Login Successfull!!", { theme: "dark" });
+        setTimeout(() => {
+          navigate("/app");
+        }, 1500);
       } catch (error) {
-        console.log(error);
-        alert("Login Failed");
+        toast.success("Login Failed!!", { theme: "dark" });
       }
     },
   });
   return (
-    <div className="w-full h-screen bg-black flex justify-center items-center ">
+    <div className="w-full h-screen bg-black flex justify-center items-center">
+      <ToastContainer position="top-right" autoClose={1500} />;
       <div>
         <h1 className="text-white font-bold text-3xl text-center flex items-center gap-2 ml-[140px]">
           <MessageCircle className="text-white mt-[10px]" size={24} />

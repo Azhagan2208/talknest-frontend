@@ -13,6 +13,7 @@ const Chat = () => {
   const [text, setText] = useState("");
 
   const currentUser = JSON.parse(localStorage.getItem("user"));
+  // console.log(currentUser);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -52,11 +53,14 @@ const Chat = () => {
   }, []);
 
   useEffect(() => {
-    socket.on("receiveMessage", (message) => {
+    const handleMessage = (message) => {
       setMessages((prev) => [...prev, message]);
-    });
-
-    return () => socket.off("receiveMessage");
+    };
+    socket.off("receiveMessage");
+    socket.on("receiveMessage", handleMessage);
+    return () => {
+      socket.off("receiveMessage", handleMessage);
+    };
   }, []);
 
   const sendMessage = async () => {
@@ -93,9 +97,14 @@ const Chat = () => {
               <img
                 src={selectedUser.profilePic}
                 alt=""
-                className="w-10 h-10 rounded-full object-cover"
+                className="w-13 h-13 rounded-full object-cover"
               />
-              <span className="font-bold">{selectedUser.username}</span>
+              <div className="flex flex-col">
+                <span className="font-bold ml-2">
+                  {selectedUser.username}
+                </span>
+                <span className="opacity-20 ml-2">{selectedUser.tagline}</span>
+              </div>
             </div>
           ) : (
             <span className="font-bold text-xl">TalkNest</span>
@@ -113,11 +122,11 @@ const Chat = () => {
                     key={msg._id}
                     className={`flex ${
                       msg.sender === currentUser?._id
-                        ? "justify-end"
-                        : "justify-start"
+                        ? "justify-end mr-6"
+                        : "justify-start ml-6"
                     }`}
                   >
-                    <div className="bg-gray-800 p-3 rounded-lg max-w-xs">
+                    <div className="bg-gradient-to-r from-slate-700 to-slate-800 text-white px-4 py-3 rounded-2xl shadow-lg">
                       <p>{msg.text}</p>
                     </div>
                   </div>

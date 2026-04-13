@@ -3,7 +3,6 @@ import Login from "../pages/Login";
 import Register from "../pages/Register";
 import Layout from "../layout/Layout";
 import Chat from "../pages/Chat";
-import Settings from "../pages/Setting";
 import ForgotPassword from "../pages/ForgotPassword";
 import CompleteSubmission from "../pages/CompleteSubmission";
 
@@ -25,19 +24,15 @@ const mainRoutes = {
     },
     {
       path: "app/:id?",
-      element: <Chat />
-    },
-    {
-      path: "settings",
-      element: <Settings />
+      element: <Chat />,
     },
     {
       path: "forgot-password",
-      element: <ForgotPassword/>
+      element: <ForgotPassword />,
     },
     {
       path: "reset-success",
-      element: <CompleteSubmission/>
+      element: <CompleteSubmission />,
     },
   ],
 };
